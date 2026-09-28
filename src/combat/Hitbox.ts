@@ -1,17 +1,9 @@
 import { Vector3 } from "@babylonjs/core";
+import { overlapsAabb, type AabbLike } from "./CombatRules";
 
-export type Aabb = {
-  center: Vector3;
-  half: Vector3;
-};
+export type Aabb = AabbLike;
 
-export function overlaps(a: Aabb, b: Aabb): boolean {
-  return (
-    Math.abs(a.center.x - b.center.x) <= a.half.x + b.half.x &&
-    Math.abs(a.center.y - b.center.y) <= a.half.y + b.half.y &&
-    Math.abs(a.center.z - b.center.z) <= a.half.z + b.half.z
-  );
-}
+export const overlaps = overlapsAabb;
 
 /** Capsule(Hurt)をAABB近似する。posは足元。 */
 export function capsuleAabb(
