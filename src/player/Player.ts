@@ -3,6 +3,7 @@ import { Input } from "../core/Input";
 import { PLAYER_TUNING } from "../data/player";
 import { ATTACKS, type AttackKey } from "../data/attacks";
 import type { AttackDefinition } from "../combat/AttackDefinition";
+import { applyDamage, isAttackWindowActive } from "../combat/CombatRules";
 import { capsuleAabb, type Aabb } from "../combat/Hitbox";
 import { PLAYER_HURTBOX } from "../combat/Hurtbox";
 import type { PlayerState } from "./PlayerState";
@@ -98,7 +99,7 @@ export class Player {
   public isAttackActive(): boolean {
     const def = this.currentAttackDef();
     if (!def) return false;
-    return this.stateTime >= def.hitStart && this.stateTime <= def.hitEnd;
+    return isAttackWindowActive(def, this.stateTime);
   }
 
   public hasHit(targetId: number): boolean {
@@ -134,7 +135,7 @@ export class Player {
 
   public takeDamage(damage: number, fromX: number, heavy: boolean, down = false): void {
     if (this.isInvincible || this.isDead) return;
-    this.hp = Math.max(0, this.hp - damage);
+    this.hp = applyDamage(this.hp, damage);
     this.flashTimer = 0.15;
     const dir = this.root.position.x >= fromX ? 1 : -1;
     this.knockback.set(dir * (down ? 6 : heavy ? 4 : 2.5), 0, 0);
