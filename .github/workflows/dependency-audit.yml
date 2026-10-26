@@ -80,3 +80,28 @@ jobs:
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
           }
           NODE
+
+      - name: Generate review-only lockfile fix candidate
+        shell: bash
+        run: |
+          npm audit fix --package-lock-only --ignore-scripts --no-fund
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const cp = require("node:child_process");
+          const before = JSON.parse(cp.execFileSync("git", ["show", "HEAD:package-lock.json"], { encoding: "utf8" }));
+          const after = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
+          const keys = new Set([...Object.keys(before.packages), ...Object.keys(after.packages)]);
+          let changed = 0;
+          for (const key of [...keys].sort()) {
+            const oldEntry = before.packages[key] ?? null;
+            const newEntry = after.packages[key] ?? null;
+            if (JSON.stringify(oldEntry) !== JSON.stringify(newEntry)) {
+              console.log("LOCKFILE_ENTRY=" + JSON.stringify({ key, entry: newEntry }));
+              changed++;
+            }
+          }
+          console.log("LOCKFILE_CHANGE_COUNT=" + changed);
+          if (changed === 0) {
+            throw new Error("No lockfile changes produced by npm audit fix");
+          }
+          NODE
