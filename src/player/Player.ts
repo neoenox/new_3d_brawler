@@ -8,6 +8,7 @@ import { capsuleAabb, type Aabb } from "../combat/Hitbox";
 import { PLAYER_HURTBOX } from "../combat/Hurtbox";
 import type { PlayerState } from "./PlayerState";
 import { CharacterModel } from "./CharacterModel";
+import { hitRecoveryExitState } from "./HitRecovery";
 
 const STATE_TO_ATTACK: Partial<Record<PlayerState, AttackKey>> = {
   Attack1: "attack1",
@@ -211,11 +212,13 @@ export class Player {
         break;
       case "HitLight":
         this.updateAir(dt, true);
-        if (this.stateTime >= PLAYER_TUNING.lightHitTime) this.setState("Idle");
+        if (this.stateTime >= PLAYER_TUNING.lightHitTime)
+          this.setState(hitRecoveryExitState(this.root.position.y));
         break;
       case "HitHeavy":
         this.updateAir(dt, true);
-        if (this.stateTime >= PLAYER_TUNING.heavyHitTime) this.setState("Idle");
+        if (this.stateTime >= PLAYER_TUNING.heavyHitTime)
+          this.setState(hitRecoveryExitState(this.root.position.y));
         break;
       case "DownBack":
       case "DownFront":
