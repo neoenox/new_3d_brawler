@@ -9,6 +9,7 @@ import { PLAYER_HURTBOX } from "../combat/Hurtbox";
 import type { PlayerState } from "./PlayerState";
 import { CharacterModel } from "./CharacterModel";
 import { hitRecoveryExitState } from "./HitRecovery";
+import { advanceDodgeHeight, dodgeExitState } from "./DodgePhysics";
 
 const STATE_TO_ATTACK: Partial<Record<PlayerState, AttackKey>> = {
   Attack1: "attack1",
@@ -370,7 +371,21 @@ export class Player {
   private updateDodge(dt: number): void {
     this.root.position.x += this.dodgeDir.x * dt;
     this.root.position.z += this.dodgeDir.z * dt;
+
+    // Air dodges must keep falling/rising; otherwise Dodge -> Idle can leave
+    // the player suspended indefinitely because Idle has no gravity update.
+    const vertical = advanceDodgeHeight(
+      this.root.position.y,
+      this.verticalVelocity,
+      dt,
+      PLAYER_TUNING.gravity,
+    );
+    this.root.position.y = vertical.height;
+    this.verticalVelocity = vertical.velocity;
+
     const total = PLAYER_TUNING.dodgeTime + PLAYER_TUNING.dodgeRecovery;
-    if (this.stateTime >= total) this.setState("Idle");
+    if (this.stateTime >= total) {
+      this.setState(dodgeExitState(this.root.position.y));
+    }
   }
 }
