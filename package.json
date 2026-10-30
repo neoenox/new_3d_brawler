@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "tsc -p tsconfig.test.json && node --test test/combat-rules.test.cjs test/hit-recovery.test.cjs"
+    "test": "tsc -p tsconfig.test.json && node --test test/combat-rules.test.cjs test/hit-recovery.test.cjs test/dodge-physics.test.cjs"
   },
   "dependencies": {
     "@babylonjs/core": "^8.0.0",
