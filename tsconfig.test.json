@@ -12,6 +12,8 @@
   },
   "include": [
     "src/combat/AttackDefinition.ts",
-    "src/combat/CombatRules.ts"
+    "src/combat/CombatRules.ts",
+    "src/player/HitRecovery.ts",
+    "src/player/DodgePhysics.ts"
   ]
 }
